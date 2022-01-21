@@ -8,7 +8,7 @@ from copy import deepcopy
 import pygame
 from constraints import WHITE,BLUE
 
-def minimax(position,depth,max_player,game):
+def minimax(position,depth,alpha,beta,max_player,game):
     #position = board
     #max_player -> True = max, Flase = min player
     if depth == 0 or position.winner() != None:
@@ -17,19 +17,25 @@ def minimax(position,depth,max_player,game):
         maxEval = float('-inf')
         best_move = None
         for move in get_all_moves(position,WHITE,game):
-            evaluation = minimax(move, depth-1, False, game)[0]
+            evaluation = minimax(move, depth-1,alpha,beta, False, game)[0]
             maxEval = max(maxEval,evaluation)
+            alpha = max(alpha,evaluation)
             if maxEval == evaluation:
                 best_move = move
+            if beta<=alpha:
+                break
         return maxEval, best_move
     else:
         minEval = float('inf')
         best_move = None
         for move in get_all_moves(position,BLUE,game):
-            evaluation = minimax(move, depth-1, True, game)[0]
+            evaluation = minimax(move, depth-1,alpha,beta, True, game)[0]
             minEval = min(minEval,evaluation)
+            beta = min(beta,evaluation)
             if minEval == evaluation:
                 best_move = move
+            if beta <= alpha:
+                break
         return minEval, best_move
     
     
@@ -49,7 +55,7 @@ def get_all_moves(board,color,game):
         valid_moves = board.get_valid_moves(piece)
         
         for move,skip in valid_moves.items():
-            draw_moves(game,board,piece)
+            #draw_moves(game,board,piece)
             temp_board = deepcopy(board)
             temp_piece = temp_board.get_piece(piece.row,piece.col)
             new_board = simulate_move(temp_piece,move,temp_board,game,skip)
